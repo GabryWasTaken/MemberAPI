@@ -1,12 +1,15 @@
+# Importing necessary modules
 from flask import Flask , g , request , jsonify
 from database import get_db , connect_db
 from functools import wraps #for create an auth method
 
-app = Flask(__name__)
+app = Flask(__name__) # Creating a Flask app instance
 
+# Setting up the API username and password
 api_username = 'admin'
 api_password = 'password'
 
+# Creating a decorator function to protect the routes
 def protected(f): #f is the function with the decorator applied (ex @protected \ def get_members())
     @wraps(f) #It takes the function and decore it
     def decorated(*args,**kwargs): #*args , **kwargs = arguments of the function 
@@ -16,11 +19,13 @@ def protected(f): #f is the function with the decorator applied (ex @protected \
         return "Authentication failed!", 401 #401 is the status code (UNAUTHORIZED)
     return decorated
 
+# Creating a function to close the database connection
 @app.teardown_appcontext
 def close_db(error):
     if hasattr(g,'sqlite_db'):
         g.sqlite_db.close()
 
+# Creating a route to get all the members
 @app.route('/member', methods=["GET"])
 @protected #decorator applied
 def get_members():
@@ -42,6 +47,7 @@ def get_members():
 
     return jsonify({ "member list" : member_list})
 
+# Creating a route to get a specific member
 @app.route("/member/<int:id>", methods=["GET"])
 @protected
 def get_member(id):
@@ -58,18 +64,31 @@ def get_member(id):
             }
     return member
 
+# Creating a route to add a new member
 @app.route("/member" , methods=["POST"])
 @protected
 def add_member():
-    new_member = request.get_json()
-    db = get_db()
+    try:
+        new_member = request.get_json() #it takes the json data from the request
+    except:
+        return '''Invalid JSON data provided, correct format 
+            { 
+    "name" : "value", 
+    "email" : "value", 
+    "level" : "value" 
+}''', 400 
+    db = get_db() 
 
     check_cur = db.execute("SELECT id,name,email,level FROM members")
     check_members = check_cur.fetchall()
 
-    name = new_member["name"]
-    email = new_member["email"]
-    level = new_member["level"]
+    try:
+        new_member = request.get_json()
+        name = new_member["name"]
+        email = new_member["email"]
+        level = new_member["level"]
+    except KeyError as e:
+        return "Invalid JSON data provided: missing key {}".format(str(e)), 400
 
     for i in check_members:
         if name == i["name"] or email == i["email"]:
@@ -83,17 +102,18 @@ def add_member():
 
     return jsonify({ 'id' : curr_member['id'] , 'name' : curr_member['name'], 'email' : curr_member['email'], 'level' : curr_member['level']})
 
-@app.route("/member/<int:id>", methods=["PUT","PATCH"])
+# Creating a route to update a member
+@app.route("/member/<int:id>", methods=["PUT","PATCH"]) 
 @protected
 def update_member(id):
     db = get_db()
 
-    updated_member_data = request.get_json()
+    updated_member_data = request.get_json() 
 
     check_cur = db.execute("SELECT id,name,email,level FROM members")
     check_members = check_cur.fetchall()
 
-    name = updated_member_data["name"]
+    name = updated_member_data["name"] 
     email = updated_member_data["email"]
     level = updated_member_data["level"]
 
@@ -116,6 +136,7 @@ def update_member(id):
     
     return jsonify({"Updated_Member": member})
 
+# Creating a route to delete a member
 @app.route("/member/<int:id>" , methods=["DELETE"])
 @protected
 def delete_member(id):
@@ -125,5 +146,6 @@ def delete_member(id):
 
     return "User {} successfully eliminated!".format(id)
 
+# Running the app
 if __name__ == '__main__':
     app.run(debug=True)
