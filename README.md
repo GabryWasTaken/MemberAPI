@@ -45,10 +45,12 @@ flask run
 if you wanna start the program with flask run you need to set the environment variable with the command:
 ```bash
 set FLASK_APP=app.py
-``` 
+```
 Once you runned the app, to authenticate yourself in the program:
 * **Username**: admin
 * **Password**: password
+
+I used PostMan to test the /member route with all of his route methods (GET,POST,PATCH,PUT and DELETE)
 ## CREDITS
 
 Application based on the guided exercise "MemberAPI" of the "The Ultimate Flask Course" on Udemy
