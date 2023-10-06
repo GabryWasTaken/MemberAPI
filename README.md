@@ -17,7 +17,7 @@ The MemberAPI allows you to easily manage your company's member database, with t
 * Update or modify an existing member's details by specifying the member ID and the fields you want to update. 
 
 **Delete Member**
-* Delete a member from the database by specifying their member ID. \
+* Delete a member from the database by specifying their member ID. 
 
 This provides a centralized way to add, view, edit or remove members without needing to manage the database directly. It enables easy integration with your existing systems.
 ## PREREQUISITES
